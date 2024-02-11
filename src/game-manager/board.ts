@@ -1,7 +1,7 @@
 import { Coordinate } from "../util";
 import { Captain } from "./captain";
-import { Minion } from "./minion";
-import { Tile } from "./tile"
+import { Minion, MinionKeywords } from "./minion";
+import { Tile, TileKeywords } from "./tile"
 
 export class Board {
     public boardSize: number;
@@ -23,16 +23,46 @@ export class Board {
         ];
     }
 
-    public setWater(isWater: Array<Array<boolean>>): void {
+    public init(boardMap: Array<Array<string>>): void {
         for (let i = 0; i < this.boardSize; i++) {
-            this.board.push([]);
             for (let j = 0; j < this.boardSize; j++) {
-                this.board[i].push(new Tile(isWater[i][j]));
+                this.board[i][j].isWater = (boardMap[i][j] == "W");
             }
         }
     }
 
+    public initStartNodes(startNodes: Array<Coordinate>) {
+        // pass
+    }
+
+    public isLegalPlacement(minion: Minion, coordinate: Coordinate): boolean{
+        let tile = this.board[coordinate.x][coordinate.y];
+        if(tile.isWater)
+            return MinionKeywords.FLYING in minion.keywords;
+        
+        let legality: boolean = true;
+        if(tile.currentMinion != null){
+            if(tile.currentMinion.team != minion.team){
+                legality = (MinionKeywords.FLYING in minion.keywords);
+            }
+        }
+
+        switch(tile.tileType){
+            case TileKeywords.DEFAULT: legality = true;
+            case TileKeywords.FLOOD: legality = (MinionKeywords.FLYING in minion.keywords);
+            case TileKeywords.EARTHQUAKE: legality = (minion.spd >= 2); 
+            case TileKeywords.FIRESTORM: legality = (minion.def >= 4);
+            case TileKeywords.WHIRLWIND: legality = (MinionKeywords.PERSISTENT in minion.keywords);
+        }
+
+        return legality;
+    }
+
     public doMove(team: number, start: Coordinate, end: Coordinate) {
+        // assert(this.board[start.x][start.y].currentMinion != null)
+        // assert(this.board[start.x][start.y].currentMinion in this.captain[team].minions)
+        // legality check, that start and end have distance less than
+        let actingMinion = this.board[start.x][start.y].currentMinion;
     }
 
     public doAttack(team: number) {
@@ -73,13 +103,10 @@ export class Board {
                         buffer[cy + iy][cx + ix] = '*';
                     }
                 }
-
-                /**
-                 * Replace this part with board[tile].repr
-                */
-
-                buffer[cy][cx+1] = i.toString();
-                buffer[cy + 1][cx+1] = j.toString();
+                
+                let repr = this.board[i][j].repr();
+                for (let r = 0; r < 3; r++) buffer[cy][cx+r] = repr[0][r];
+                for (let r = 0; r < 3; r++) buffer[cy+1][cx+r] = repr[1][r];
             }
         }
 

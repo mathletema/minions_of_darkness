@@ -1,0 +1,33 @@
+{
+    "boardSize": 4,
+    "boardMap": [
+        [
+            ["W", "D", "D", "D"],
+            ["D", "W", "D", "D"],
+            ["W", "D", "D", "D"],
+            ["W", "W", "W", "W"]
+        ],
+        [
+            ["W", "D", "D", "W"],
+            ["D", "W", "D", "W"],
+            ["D", "D", "D", "W"],
+            ["W", "W", "W", "W"]
+        ]
+    ],
+    "startNodes": [
+        [{"x": 1, "y": 1}, {"x": 2, "y": 2}],
+        [{"x": 2, "y": 1}, {"x": 1, "y": 2}]
+    ],
+    "minion_stats": {
+        "captain":  {"atk": 0, "def": 7, "range": 1, "spd": 1, "keywords": ["unsummon"], "cost": "INFTY", "rebait": 0},
+        "zombie" :  {"atk": 1, "def": 1, "range": 1, "spd": 1, "keywords": ["lumbering"], "cost": 2, "rebait": 0},
+        "acolyte":  {"atk": 0, "def": 2, "range": 0, "spd": 2, "keywords": ["spawning"], "cost": 4, "rebait":2},
+        "initiate": {"atk": 2, "def": 3, "range": 1, "spd": 2, "keywords": ["lumbering", "spawning", "persistent"], "cost": 3, "rebait": 1},
+        "skeleton": {"atk": 5, "def": 2, "range": 1, "spd": 1, "keywords": ["flying"], "cost": 4, "rebait": 2},
+        "serpent":  {"atk": 3, "def": 1, "range": 1, "spd": 2, "keywords": ["flying"], "cost": 6, "rebait": 4},
+        "warg":     {"atk": 1, "def": 1, "range": 1, "spd": 3, "keywords": [], "cost": 4, "rebait":2},
+        "ghost":    {"atk": 1, "def": 4, "range": 1, "spd": 1, "keywords": ["persistent", "ward", "flying", "crt_whirlwing"], "cost": 3, "rebait": 0},
+        "wights":   {"atk": 5, "def": 3, "range": 2, "spd": 0, "keywords": ["blink", "flurry"], "cost": 4, "rebait": 1},
+        "haunts":   {"atk": 2, "def": 2, "range": 3, "spd": 0, "keywords": ["blink", "crt_earthquake"], "cost": 5, "rebait": 1}
+    }
+}

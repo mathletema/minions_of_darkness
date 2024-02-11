@@ -29,8 +29,16 @@ export class GameManager {
         this.currentTeam = 0;
     }
 
-    public initBoards() {
-        // set water for each board etc
+    public initBoards(boardMap: Array<Array<Array<string>>>) {
+        for (let i = 0; i < this.numBoards; i++) {
+            this.board[i].init(boardMap[i]);
+        }
+    }
+
+    public initStartNodes(startNodes: Array<Array<Coordinate>>) {
+        for (let i = 0; i < this.numBoards; i++) {
+            this.board[i].initStartNodes(startNodes[i]);
+        }
     }
 
     public doMove(boardIndex: number, start: Coordinate, end: Coordinate) {
