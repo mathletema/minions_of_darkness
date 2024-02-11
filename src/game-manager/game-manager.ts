@@ -1,49 +1,55 @@
-import { Team } from './team';
 import { Board } from './board';
 import { Coordinate } from '../util';
 import { Minion } from './minion';
+import { General } from './general';
 
 enum MoveType { MOVE, ATTACK };
 
 export class GameManager {
-    public numCaptains: number;
-    public teams: Array<Team>;
+    public numBoards: number;
+    public general: Array<General>
     public currentTeam: number;
-    public readonly boards: Array<Board>;
+    public readonly board: Array<Board>;
     public boardSize: number;
 
-    public constructor (numCaptains: number, boardSize: number) {
-        this.numCaptains = numCaptains;
+    public constructor (numBoards: number, boardSize: number) {
+        this.numBoards = numBoards;
         this.boardSize = boardSize;
-        this.teams = [
-            new Team(numCaptains),
-            new Team(numCaptains)
+        
+        this.general = [
+            new General(),
+            new General()
         ];
-        this.currentTeam = 0;
-        this.boards = [];
-        for (let i = 0; i < numCaptains; i++) {
-            this.boards[i] = new Board(boardSize);
+
+        this.board = [];
+        for (let i = 0; i < numBoards; i++) {
+            this.board[i] = new Board(boardSize);
         }
+
+        this.currentTeam = 0;
     }
 
     public initBoards() {
         // set water for each board etc
     }
 
-    public doMove(captainIndex: number, start: Coordinate, end: Coordinate) {
+    public doMove(boardIndex: number, start: Coordinate, end: Coordinate) {
+        this.board[boardIndex].doMove(this.currentTeam, start, end);
     }
 
-    public doAttack(captainIndex: number) {
+    public doAttack(boardIndex: number) {
+        this.board[boardIndex].doAttack(this.currentTeam);
     }
 
-    public doSpawn(captainIndex: number, position: Coordinate, minion: Minion) {
+    public doSpawn(boardIndex: number, position: Coordinate, minion: Minion) {
+        this.board[boardIndex].doSpawn(this.currentTeam, position, minion);
     }
 
     public print() {
-        for (let i = 0; i < this.numCaptains; i++) {
-            console.log(`Board ${i+1}....`)
-            this.boards[i].print();
-            console.log("\n\n\n\n");
+        for (let i = 0; i < this.numBoards; i++) {
+            console.log(`\n\nBoard ${i+1}....`)
+            this.board[i].print();
+            console.log("\n\n");
         }
     }
 }

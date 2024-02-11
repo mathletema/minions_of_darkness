@@ -1,14 +1,26 @@
+import { Coordinate } from "../util";
+import { Captain } from "./captain";
+import { Minion } from "./minion";
 import { Tile } from "./tile"
 
 export class Board {
     public boardSize: number;
     public readonly board: Array<Array<Tile>>;
-    // public startCoord;
+    public readonly captain: Array<Captain>;
 
     constructor(boardSize: number) {
         this.boardSize = boardSize;
         this.board = [];
-        // this.startCoord = 
+        for (let i = 0; i < boardSize; i++) {
+            this.board.push([])
+            for (let j = 0; j < boardSize; j++) {
+                this.board[i].push(new Tile(false))
+            }
+        }
+        this.captain = [
+            new Captain(), 
+            new Captain(),
+        ];
     }
 
     public setWater(isWater: Array<Array<boolean>>): void {
@@ -20,16 +32,20 @@ export class Board {
         }
     }
 
+    public doMove(team: number, start: Coordinate, end: Coordinate) {
+    }
+
+    public doAttack(team: number) {
+    }
+
+    public doSpawn(team: number, position: Coordinate, minion: Minion) {
+    }
+
     public print(): void {
         let W = 7 * this.boardSize + 4;
         let H = 6 * this.boardSize;
-        let buffer:Array<Array<string>> = [];
-        for (let i = 0; i < H; i++) {
-            buffer.push([]);
-            for (let j = 0; j < W; j++) {
-                buffer[i].push('.');
-            }
-        }
+
+        let buffer:string[][] = Array.from({ length: H }, () => Array(W).fill('.'))
 
         let pattern = [
             "   _ _   ",
@@ -39,14 +55,12 @@ export class Board {
             " \\ _ _ / ",
         ];
 
-        let px = 3;
-        let py = 2;
+        let px = 3; let py = 2;
 
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
-                let cx:number = 4 + 7*i;
+                let cx:number = W - 7 - 7*i;
                 let cy:number = 2 + 4*j + 2*i;
-                cx = W - 3 - cx;
                 
                 for (let rx = 0; rx < 9; rx++) {
                     for (let ry = 0; ry < 5; ry++) {
@@ -75,8 +89,7 @@ export class Board {
             for (let j = 0; j < W; j++) {
                 process.stdout.write(buffer[i][j]);
             }
-            process.stdout.write('|')
-            process.stdout.write('\n');
+            process.stdout.write('|\n')
         }
         process.stdout.write('|' + '_'.repeat(W) + '|' + '\n');   
     }
