@@ -39,6 +39,11 @@ export class GameManager {
     public doSpawn(captainIndex: number, position: Coordinate, minion: Minion) {
     }
 
-    public printState() {
+    public print() {
+        for (let i = 0; i < this.numCaptains; i++) {
+            console.log(`Board ${i+1}....`)
+            this.boards[i].print();
+            console.log("\n\n\n\n");
+        }
     }
 }
