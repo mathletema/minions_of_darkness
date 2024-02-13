@@ -35,7 +35,17 @@ export class Board {
         // pass
     }
 
-    public isLegalPlacement(minion: Minion, coordinate: Coordinate): boolean{
+    public isOnBoard(coordinate: Coordinate): boolean{
+        if (coordinate.x >= this.boardSize || coordinate.x < 0)
+            return false;
+        if (coordinate.y >= this.boardSize || coordinate.y < 0)
+            return false;
+        return true;
+    }
+
+    public isLegalPlacement(coordinate: Coordinate, minion: Minion): boolean{
+        if(!this.isOnBoard(coordinate))
+            return false;
         let tile = this.board[coordinate.x][coordinate.y];
         if(tile.isWater)
             return MinionKeywords.FLYING in minion.keywords;
@@ -58,14 +68,80 @@ export class Board {
         return legality;
     }
 
-    public doMove(team: number, start: Coordinate, end: Coordinate) {
+    public adjacentPositionsForMinion(position: Coordinate, minion: Minion): Array<Coordinate>{
+        let adjacentPositions: Array<Coordinate> = new Array();
+        let potentialPositions: Array<Coordinate> = 
+        [
+            {x: position.x,   y: position.y+1},
+            {x: position.x+1, y: position.y},
+            {x: position.x,   y: position.y-1},
+            {x: position.x-1, y: position.y},
+            {x: position.x+1, y: position.y-1},
+            {x: position.x-1, y: position.y+1}
+        ]
+
+        for(let potentialPosition of potentialPositions){
+            if(this.isLegalPlacement(potentialPosition, minion)){
+                adjacentPositions.push(potentialPosition)
+            }
+        }
+
+        return adjacentPositions;
+    }
+
+    public isReachable(start: Coordinate, target: Coordinate, minion: Minion): boolean{
+        const visited: Set<Coordinate> = new Set();
+        const queue: {position: Coordinate, depth: number}[] = [];
+
+        visited.add(start);
+        queue.push({ position: start, depth: 0 });
+
+        let analyzedPositions = 0;
+        while(queue.length > analyzedPositions){
+            const { position, depth } = queue[analyzedPositions];
+            if (position === target)
+                return true;
+            if (depth >= minion.spd)
+                continue;
+
+            for (const neighbour of this.adjacentPositionsForMinion(position, minion)){
+                if(!visited.has(neighbour)){
+                    visited.add(neighbour);
+                    queue.push({ position: neighbour, depth: depth + 1 })
+                }
+            }
+        }
+        return false;
+    }
+
+    public doMove(team: number, start: Coordinate, target: Coordinate) {
         // assert(this.board[start.x][start.y].currentMinion != null)
         // assert(this.board[start.x][start.y].currentMinion in this.captain[team].minions)
         // legality check, that start and end have distance less than
-        let actingMinion = this.board[start.x][start.y].currentMinion;
+        let actingMinion: Minion | null = this.board[start.x][start.y].currentMinion;
+        if (actingMinion === null){
+            throw new Error("Tile is empty! No minion to move!");
+        }
+        else{
+            if (!this.isReachable(start, target, actingMinion)){
+                throw new Error("Minion can not move so fast!");
+            }
+
+            if (this.board[target.x][target.y].currentMinion !== null){
+                throw new Error("Minion can not move on top of other minion");
+                // TODO Minion should be able to move over friendly minion that can move,
+                // as long as that minion is forced to move as part of next micro move
+                // Minor detail.
+            }
+
+            // Minion was able to reach there!
+
+            this.board[start.x][start.y].currentMinion = null;
+            this.board[target.x][target.y].currentMinion = actingMinion;
+        }
     }
 
-    public doAttack(team: number) {
+    public doAttack(team: number, start: Coordinate, target: Coordinate) {
     }
 
     public doSpawn(team: number, position: Coordinate, minion: Minion) {

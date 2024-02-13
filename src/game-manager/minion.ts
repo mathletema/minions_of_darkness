@@ -15,16 +15,21 @@ export class Minion {
     public hasAttacked: boolean;
     public isExhausted: boolean;
 
+    public id: number;
+
     public constructor(minionType : MinionType, team: number) {
         this.spd = minionType.spd;
         this.range = minionType.range;
         this.atk = minionType.atk;
         this.def = minionType.def;
+
+        this.id = Math.random()
+
         this.keywords = minionType.keywords.slice();
         this.team = team;
         this.hasMoved = true; // minion can't move or attack the turn it spawns
         this.hasAttacked = true;
-        this.isExhausted = true;
+        this.isExhausted = true; // minion can't do anything the turn it spawns
     }
 }
 
@@ -46,6 +51,12 @@ export class MinionType {
         this.keywords = keywords;
         this.cost = cost;
         this.rebait = rebait;
+    }
+
+    public createNewMinion(team: number, boardNumber: number) {
+        let minion = new Minion(this, team);
+
+        
     }
 }
 

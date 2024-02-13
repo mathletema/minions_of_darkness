@@ -1,6 +1,6 @@
 import { Board } from './board';
 import { Coordinate } from '../util';
-import { Minion } from './minion';
+import { MinionType, Minion } from './minion';
 import { General } from './general';
 
 enum MoveType { MOVE, ATTACK };
@@ -41,15 +41,19 @@ export class GameManager {
         }
     }
 
-    public doMove(boardIndex: number, start: Coordinate, end: Coordinate) {
-        this.board[boardIndex].doMove(this.currentTeam, start, end);
+    public createMinion(boardIndex: number, minionType: MinionType): void{
+
     }
 
-    public doAttack(boardIndex: number) {
-        this.board[boardIndex].doAttack(this.currentTeam);
+    public doMove(boardIndex: number, start: Coordinate, target: Coordinate): void {
+        this.board[boardIndex].doMove(this.currentTeam, start, target);
     }
 
-    public doSpawn(boardIndex: number, position: Coordinate, minion: Minion) {
+    public doAttack(boardIndex: number, start: Coordinate, target: Coordinate): void {
+        this.board[boardIndex].doAttack(this.currentTeam, start, target);
+    }
+
+    public doSpawn(boardIndex: number, position: Coordinate, minion: Minion): void {
         this.board[boardIndex].doSpawn(this.currentTeam, position, minion);
     }
 
