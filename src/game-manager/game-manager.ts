@@ -45,6 +45,13 @@ export class GameManager {
         }
     }
 
+    public endTurn() {
+        for(let i = 0; i < this.numBoards; i++){
+            this.board[i].endTurn();
+        }
+        this.currentTeam = 1 - this.currentTeam;
+    }
+
     public doMove(boardIndex: number, start: Coordinate, target: Coordinate): void {
         this.board[boardIndex].doMove(this.currentTeam, start, target);
     }

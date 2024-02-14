@@ -39,6 +39,7 @@ export class Board {
         for (let team = 0; team < 2; team++){
             minion = new Minion(this.minionTypes.NECROMANCER, team);
             this.createMinion(startPositions[team], minion);
+
             for (let neighbour of this.adjacentPositionsForMinion(startPositions[team], null)){
                 minion = new Minion(this.minionTypes.ZOMBIE, team);
                 this.createMinion(neighbour, minion);
@@ -56,6 +57,10 @@ export class Board {
         else {
             this.captains[team].reinforcements.push(minion);
         }
+    }
+
+    public endTurn() {
+        // TODO - reset minions, return soul and rebait
     }
 
     public isOnBoard(coordinate: Coordinate): boolean{
