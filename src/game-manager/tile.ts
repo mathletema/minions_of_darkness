@@ -21,6 +21,7 @@ export class Tile {
     }
 
     public repr (): Array<string> {
+        // let WaterRep = this.isWater ? " W " : "   ", "***"
         return [this.isWater ? " W " : "   ", "***"]
     }
 }

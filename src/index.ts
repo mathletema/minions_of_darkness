@@ -13,7 +13,7 @@ interface gameConfig {
     boardSize: number;
     boardMap: Array<Array<Array<string>>>;
     startNodes: Array<Array<Coordinate>>;
-    minion_stats: Map<string, Map<string, string>>;
+    minionStats: Map<string, Map<string, string>>;
 }
 
 let data = fs.readFileSync('./game-configs/test.json', 'utf8');

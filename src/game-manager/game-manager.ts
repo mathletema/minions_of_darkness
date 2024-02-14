@@ -41,10 +41,6 @@ export class GameManager {
         }
     }
 
-    public createMinion(boardIndex: number, minionType: MinionType): void{
-
-    }
-
     public doMove(boardIndex: number, start: Coordinate, target: Coordinate): void {
         this.board[boardIndex].doMove(this.currentTeam, start, target);
     }

@@ -32,7 +32,8 @@ export class Board {
     }
 
     public initStartNodes(startNodes: Array<Coordinate>) {
-        // pass
+        // Give each player the starting configuration of minions
+        // 
     }
 
     public isOnBoard(coordinate: Coordinate): boolean{
@@ -43,9 +44,13 @@ export class Board {
         return true;
     }
 
-    public isLegalPlacement(coordinate: Coordinate, minion: Minion): boolean{
+    public isLegalPlacement(coordinate: Coordinate, minion: Minion | null): boolean{
         if(!this.isOnBoard(coordinate))
             return false;
+
+        if (minion === null)
+            return true;
+
         let tile = this.board[coordinate.x][coordinate.y];
         if(tile.isWater)
             return MinionKeywords.FLYING in minion.keywords;
@@ -68,7 +73,7 @@ export class Board {
         return legality;
     }
 
-    public adjacentPositionsForMinion(position: Coordinate, minion: Minion): Array<Coordinate>{
+    public adjacentPositionsForMinion(position: Coordinate, minion: Minion | null): Array<Coordinate>{
         let adjacentPositions: Array<Coordinate> = new Array();
         let potentialPositions: Array<Coordinate> = 
         [

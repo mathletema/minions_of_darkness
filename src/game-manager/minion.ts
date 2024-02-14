@@ -43,7 +43,9 @@ export class MinionType {
     public cost: number;
     public rebait: number;
 
-    public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeywords>) {
+    public rawLineNumber: number;
+
+    public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeywords>, rawLineNumber: number) {
         this.spd = spd;
         this.range = range;
         this.atk = atk;
@@ -51,12 +53,13 @@ export class MinionType {
         this.keywords = keywords;
         this.cost = cost;
         this.rebait = rebait;
+        this.rawLineNumber = rawLineNumber;
     }
 
     public createNewMinion(team: number, boardNumber: number) {
         let minion = new Minion(this, team);
 
-        
+
     }
 }
 
