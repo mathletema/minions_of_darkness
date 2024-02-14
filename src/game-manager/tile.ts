@@ -2,7 +2,7 @@ import { Minion } from "./minion";
 // import { Coordinate } from "../util";
 
 export enum TileKeyword {
-    DEFAULT, FLOOD, EARTHQUAKE, FIRESTORM, WHIRLWIND
+    DEFAULT, FLOOD, EARTHQUAKE, FIRESTORM, WHIRLWIND, GRAVEYARD
 }
 
 export class Tile {
@@ -10,9 +10,8 @@ export class Tile {
     public hasMinion: boolean;
     public currentMinion: Minion | null;
     public tileType: TileKeyword;
+    public isGraveyard: boolean = false;
 
-    // public readonly neighbouringTiles: Array<Tile>;
-    
     public constructor (isWater: boolean) {
         this.hasMinion = false;
         this.tileType = TileKeyword.DEFAULT;

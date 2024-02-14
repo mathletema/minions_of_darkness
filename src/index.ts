@@ -7,7 +7,9 @@ import { UnitName, MinionType, MinionKeyword } from './game-manager/minion';
 const __HELP__ =
     "help  : displays this prompt    \n"
     "print : prints current board map\n"
-    "quit  : quits program           \n";
+    "quit  : quits program           \n"
+    "move bd_num x1 y1 x2 y2: moves piece from (x1, y1) -> (x2, y2) on board bd_num \n"
+    "pass  : passes the turn"
 const __PROMPT__ = "_> "
 
 interface gameConfig {
@@ -20,7 +22,7 @@ interface gameConfig {
 // TODO: hardcoded MinionData, will Fix
 let minionData: Record <UnitName, MinionType> = 
 {   
-    NECROMANCER: new MinionType(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT], 0),
+    NECROMANCER: new MinionType(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.IS_NECROMANCER, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3], 0),
     ZOMBIE: new MinionType(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0)
 }
 
@@ -40,9 +42,18 @@ process.stdout.write(__PROMPT__)
 
 process.stdin.on("data", (buffer) => {
     // handle input
-    let data = buffer.toString().trim()
-    if (data == "quit") process.exit()
-    if (data == "help") process.stdout.write(__HELP__)
-    if (data == "print") game.print()
+    let data = buffer.toString().trim();
+    if (data == "quit") process.exit();
+    if (data == "help") process.stdout.write(__HELP__);
+    if (data == "print") game.print();
+    if (data.slice(0, 4) == "move") {
+        let fragmentedData: Array<string> = data.slice(4).split(' ');
+        let boardIndex = parseInt(fragmentedData[0]);
+        let start: Coordinate = {x: parseInt(fragmentedData[1]), y: parseInt(fragmentedData[2])};
+        let target: Coordinate = {x: parseInt(fragmentedData[3]), y: parseInt(fragmentedData[4])};
+
+        game.doMove(boardIndex, start, target);
+    }
+    if (data == "pass") game.endTurn();
     process.stdout.write(__PROMPT__)
 })

@@ -70,5 +70,6 @@ export class GameManager {
             this.board[i].print();
             console.log("\n\n");
         }
+        console.log("Current team" + this.currentTeam + "\n\n");
     }
 }

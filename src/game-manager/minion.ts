@@ -1,5 +1,5 @@
 export enum MinionKeyword {
-    LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD
+    LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD, IS_NECROMANCER, UNDEATHTOUCHABLE, GENERATE_MANA_3, GENERATE_MANA_2
 }
 
 export type UnitName = "NECROMANCER" | "ZOMBIE" // ACOLYTE, INITIATE, SKELETON, SERPENT, WARG, GHOST, WIGHT, HAUNT
@@ -16,6 +16,7 @@ export class Minion {
     public isExhausted: boolean;
 
     public team;
+    public type;
 
     public id: number;
 
@@ -34,6 +35,8 @@ export class Minion {
         this.isExhausted = true;
 
         this.team = team;
+
+        this.type = minionType;
     }
 }
 
@@ -59,12 +62,6 @@ export class MinionType {
         this.rebait = rebait;
         this.rawLineNumber = rawLineNumber;
     }
-
-    // public createNewMinion(team: number, boardNumber: number) {
-    //     let minion = new Minion(this, team);
-
-
-    // }
 }
 
 // class MinionFactory {

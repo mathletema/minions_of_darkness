@@ -60,6 +60,18 @@ export class Board {
     }
 
     public endTurn() {
+        for (let team = 0; team < 2; team++){
+            for (let minion of this.captains[team].activeMinions){
+                minion.atk = minion.type.atk;
+                minion.def = minion.type.def;
+                minion.spd = minion.type.spd;
+                minion.range = minion.type.range;
+
+                minion.hasMoved = false;
+                minion.hasAttacked = false;
+                minion.isExhausted = false;
+            }
+        }
         // TODO - reset minions, return soul and rebait
     }
 
@@ -152,25 +164,33 @@ export class Board {
         // legality check, that start and end have distance less than
         let actingMinion: Minion | null = this.board[start.x][start.y].currentMinion;
         if (actingMinion === null){
-            throw new Error("Tile is empty! No minion to move!");
+           console.log("Tile is empty! No minion to move!");
+           return;
         }
-        else{
-            if (!this.isReachable(start, target, actingMinion)){
-                throw new Error("Minion can not move so fast!");
-            }
 
-            if (this.board[target.x][target.y].currentMinion !== null){
-                throw new Error("Minion can not move on top of other minion");
-                // TODO Minion should be able to move over friendly minion that can move,
-                // as long as that minion is forced to move as part of next micro move
-                // Minor detail.
-            }
-
-            // Minion was able to reach there!
-
-            this.board[start.x][start.y].currentMinion = null;
-            this.board[target.x][target.y].currentMinion = actingMinion;
+        if (!actingMinion.hasMoved){
+            console.log("Minion has moved");
+            return;
         }
+        
+        if (!this.isReachable(start, target, actingMinion)){
+            console.log("Minion can not move there!");
+            return;
+        }
+
+        if (this.board[target.x][target.y].currentMinion !== null){
+            console.log("Minion can not move on top of other minion");
+            return;
+            // TODO Minion should be able to move over friendly minion that can move,
+            // as long as that minion is forced to move as part of next micro move
+            // Minor detail.
+        }
+
+        // Minion was able to reach there!
+
+        this.board[start.x][start.y].currentMinion = null;
+        this.board[target.x][target.y].currentMinion = actingMinion;
+        actingMinion.hasMoved = true;
     }
 
     public doAttack(team: number, start: Coordinate, target: Coordinate) {
