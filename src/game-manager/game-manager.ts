@@ -1,9 +1,9 @@
 import { Board } from './board';
 import { Coordinate } from '../util';
-import { MinionType, Minion } from './minion';
+import { MinionType, Minion, UnitName, MinionKeyword } from './minion';
 import { General } from './general';
 
-enum MoveType { MOVE, ATTACK };
+enum MoveType { MOVE, ATTACK, SPAWN };
 
 export class GameManager {
     public numBoards: number;
@@ -11,8 +11,9 @@ export class GameManager {
     public currentTeam: number;
     public readonly board: Array<Board>;
     public boardSize: number;
+    public minionTypesData: Record<UnitName, MinionType>;
 
-    public constructor (numBoards: number, boardSize: number) {
+    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionType>) {
         this.numBoards = numBoards;
         this.boardSize = boardSize;
         
@@ -23,21 +24,24 @@ export class GameManager {
 
         this.board = [];
         for (let i = 0; i < numBoards; i++) {
-            this.board[i] = new Board(boardSize);
+            this.board[i] = new Board(boardSize, minionData);
         }
 
         this.currentTeam = 0;
+
+        this.minionTypesData = minionData;
     }
 
     public initBoards(boardMap: Array<Array<Array<string>>>) {
         for (let i = 0; i < this.numBoards; i++) {
             this.board[i].init(boardMap[i]);
+            // this.board[i].initMinionTypesData(this.minionTypesData);
         }
     }
 
-    public initStartNodes(startNodes: Array<Array<Coordinate>>) {
+    public initStartPositions(startNodes: Array<Array<Coordinate>>) {
         for (let i = 0; i < this.numBoards; i++) {
-            this.board[i].initStartNodes(startNodes[i]);
+            this.board[i].initStartPosition(startNodes[i]);
         }
     }
 

@@ -1,14 +1,15 @@
 import { Coordinate } from "../util";
 import { Captain } from "./captain";
-import { Minion, MinionKeywords } from "./minion";
-import { Tile, TileKeywords } from "./tile"
+import { Minion, MinionKeyword, MinionType, UnitName } from "./minion";
+import { Tile, TileKeyword } from "./tile"
 
 export class Board {
     public boardSize: number;
     public readonly board: Array<Array<Tile>>;
-    public readonly captain: Array<Captain>;
+    public readonly captains: Array<Captain>;
+    public minionTypes: Record<UnitName, MinionType>;
 
-    constructor(boardSize: number) {
+    constructor(boardSize: number, minionTypes: Record<UnitName, MinionType>) {
         this.boardSize = boardSize;
         this.board = [];
         for (let i = 0; i < boardSize; i++) {
@@ -17,10 +18,11 @@ export class Board {
                 this.board[i].push(new Tile(false))
             }
         }
-        this.captain = [
+        this.captains = [
             new Captain(), 
             new Captain(),
         ];
+        this.minionTypes = minionTypes;
     }
 
     public init(boardMap: Array<Array<string>>): void {
@@ -31,9 +33,29 @@ export class Board {
         }
     }
 
-    public initStartNodes(startNodes: Array<Coordinate>) {
+    public initStartPosition(startPositions: Array<Coordinate>) {
         // Give each player the starting configuration of minions
-        // 
+        let minion: Minion;
+        for (let team = 0; team < 2; team++){
+            minion = new Minion(this.minionTypes.NECROMANCER, team);
+            this.createMinion(startPositions[team], minion);
+            for (let neighbour of this.adjacentPositionsForMinion(startPositions[team], null)){
+                minion = new Minion(this.minionTypes.ZOMBIE, team);
+                this.createMinion(neighbour, minion);
+            }
+            
+        }
+    }
+
+    public createMinion(position: Coordinate | null, minion: Minion) {
+        let team = minion.team;
+        if (position !== null){
+            this.captains[team].activeMinions.push(minion);
+            this.board[position.x][position.y].currentMinion = minion;
+        }
+        else {
+            this.captains[team].reinforcements.push(minion);
+        }
     }
 
     public isOnBoard(coordinate: Coordinate): boolean{
@@ -53,21 +75,21 @@ export class Board {
 
         let tile = this.board[coordinate.x][coordinate.y];
         if(tile.isWater)
-            return MinionKeywords.FLYING in minion.keywords;
+            return MinionKeyword.FLYING in minion.keywords;
         
         let legality: boolean = true;
         if(tile.currentMinion != null){
             if(tile.currentMinion.team != minion.team){
-                legality = (MinionKeywords.FLYING in minion.keywords);
+                legality = (MinionKeyword.FLYING in minion.keywords);
             }
         }
 
         switch(tile.tileType){
-            case TileKeywords.DEFAULT: legality = true;
-            case TileKeywords.FLOOD: legality = (MinionKeywords.FLYING in minion.keywords);
-            case TileKeywords.EARTHQUAKE: legality = (minion.spd >= 2); 
-            case TileKeywords.FIRESTORM: legality = (minion.def >= 4);
-            case TileKeywords.WHIRLWIND: legality = (MinionKeywords.PERSISTENT in minion.keywords);
+            case TileKeyword.DEFAULT: legality = true;
+            case TileKeyword.FLOOD: legality = (MinionKeyword.FLYING in minion.keywords);
+            case TileKeyword.EARTHQUAKE: legality = (minion.spd >= 2); 
+            case TileKeyword.FIRESTORM: legality = (minion.def >= 4);
+            case TileKeyword.WHIRLWIND: legality = (MinionKeyword.PERSISTENT in minion.keywords);
         }
 
         return legality;

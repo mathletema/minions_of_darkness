@@ -23,7 +23,7 @@
         [{"x": 1, "y": 1}, {"x": 4, "y": 4}]
     ],
     "minion_stats": {
-        "necromancer" : {"atk": 0, "def": 7, "range": 1, "spd": 1, "keywords": ["unsummon"], "cost": "INFTY", "rebait": 0},
+        "necromancer" : {"atk": 0, "def": 7, "range": 1, "spd": 1, "keywords": ["unsummon"], "cost": 0, "rebait": 0},
         "zombie"      : {"atk": 1, "def": 1, "range": 1, "spd": 1, "keywords": ["lumbering"], "cost": 2, "rebait": 0},
         "acolyte"     : {"atk": 0, "def": 2, "range": 0, "spd": 2, "keywords": ["spawning"], "cost": 4, "rebait":2},
         "initiate"    : {"atk": 2, "def": 3, "range": 1, "spd": 2, "keywords": ["lumbering", "spawning", "persistent"], "cost": 3, "rebait": 1},

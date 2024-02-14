@@ -1,19 +1,21 @@
-export enum MinionKeywords {
+export enum MinionKeyword {
     LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD
 }
+
+export type UnitName = "NECROMANCER" | "ZOMBIE" // ACOLYTE, INITIATE, SKELETON, SERPENT, WARG, GHOST, WIGHT, HAUNT
 
 export class Minion {
     public spd: number;
     public range: number;
     public atk: number;
     public def: number;
-    public readonly keywords: Array<MinionKeywords>;
-
-    public team: number;
+    public readonly keywords: Array<MinionKeyword>;
 
     public hasMoved: boolean;
     public hasAttacked: boolean;
     public isExhausted: boolean;
+
+    public team;
 
     public id: number;
 
@@ -26,10 +28,12 @@ export class Minion {
         this.id = Math.random()
 
         this.keywords = minionType.keywords.slice();
-        this.team = team;
-        this.hasMoved = true; // minion can't move or attack the turn it spawns
+
+        this.hasMoved = true;
         this.hasAttacked = true;
-        this.isExhausted = true; // minion can't do anything the turn it spawns
+        this.isExhausted = true;
+
+        this.team = team;
     }
 }
 
@@ -38,14 +42,14 @@ export class MinionType {
     public range: number;
     public atk: number;
     public def: number;
-    public readonly keywords: Array<MinionKeywords>;
+    public readonly keywords: Array<MinionKeyword>;
 
     public cost: number;
     public rebait: number;
 
     public rawLineNumber: number;
 
-    public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeywords>, rawLineNumber: number) {
+    public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeyword>, rawLineNumber: number) {
         this.spd = spd;
         this.range = range;
         this.atk = atk;
@@ -56,11 +60,11 @@ export class MinionType {
         this.rawLineNumber = rawLineNumber;
     }
 
-    public createNewMinion(team: number, boardNumber: number) {
-        let minion = new Minion(this, team);
+    // public createNewMinion(team: number, boardNumber: number) {
+    //     let minion = new Minion(this, team);
 
 
-    }
+    // }
 }
 
 // class MinionFactory {
