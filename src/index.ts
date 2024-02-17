@@ -5,11 +5,11 @@ import { Coordinate } from "./util";
 import { UnitName, MinionType, MinionKeyword } from './game-manager/minion';
 
 const __HELP__ =
-    "help  : displays this prompt    \n"
-    "print : prints current board map\n"
-    "quit  : quits program           \n"
-    "move bd_num x1 y1 x2 y2: moves piece from (x1, y1) -> (x2, y2) on board bd_num \n"
-    "pass  : passes the turn"
+    "help               : display this prompt    \n" +
+    "print              : print current board map\n" +
+    "quit               : quit program           \n" +
+    "move B x1 y1 x2 y2 : move piece from (x1, y1) -> (x2, y2) on board B \n" +
+    "pass               : pass the turn";
 const __PROMPT__ = "_> "
 
 interface gameConfig {
@@ -42,18 +42,22 @@ process.stdout.write(__PROMPT__)
 
 process.stdin.on("data", (buffer) => {
     // handle input
-    let data = buffer.toString().trim();
-    if (data == "quit") process.exit();
-    if (data == "help") process.stdout.write(__HELP__);
-    if (data == "print") game.print();
-    if (data.slice(0, 4) == "move") {
-        let fragmentedData: Array<string> = data.slice(4).split(' ');
-        let boardIndex = parseInt(fragmentedData[0]);
-        let start: Coordinate = {x: parseInt(fragmentedData[1]), y: parseInt(fragmentedData[2])};
-        let target: Coordinate = {x: parseInt(fragmentedData[3]), y: parseInt(fragmentedData[4])};
-
-        game.doMove(boardIndex, start, target);
+    let data = buffer.toString().trim().split(' ')
+    if (data[0] == "quit") process.exit();
+    else if (data[0] == "help") process.stdout.write(__HELP__);
+    else if (data[0] == "print") game.print();
+    else if (data[0] == "move") {
+        try {
+            let boardIndex: number = parseInt(data[1]);
+            let start: Coordinate = {x: parseInt(data[2]), y: parseInt(data[3])};
+            let end: Coordinate = {x: parseInt(data[4]), y: parseInt(data[5])};
+            game.doMove(boardIndex, start, end);
+        } catch {
+            process.stdout.write(`invalid move command`)
+        }
     }
-    if (data == "pass") game.endTurn();
+    else {
+        process.stdout.write(`command ${data[0]} not found, see help for more\n`)
+    }
     process.stdout.write(__PROMPT__)
 })
