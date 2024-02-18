@@ -32,7 +32,9 @@ console.log(config.startNodes[0][0])
 
 const NUM_BOARDS = 2;
 
-const game = new GameManager(NUM_BOARDS, config["boardSize"], minionData);
+const mana = Math.floor(5.5 * NUM_BOARDS);
+
+const game = new GameManager(NUM_BOARDS, config["boardSize"], minionData, mana);
 // game.initMinionData(minionData)
 game.initBoards(config.boardMap);
 game.initStartPositions(config.startNodes);

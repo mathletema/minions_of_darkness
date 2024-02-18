@@ -52,7 +52,6 @@ export class Board {
                 minion = new Minion(this.minionData.ZOMBIE, team);
                 this.createMinion(neighbour, minion);
             }
-            
         }
     }
 
@@ -67,7 +66,7 @@ export class Board {
         }
     }
 
-    public endTurn() {
+    public endTurn(currentTeam: number) {
         for (let team = 0; team < 2; team++){
             for (let minion of this.captains[team].activeMinions){
                 minion.atk = minion.type.atk;
@@ -81,6 +80,44 @@ export class Board {
             }
         }
         // TODO - reset minions, return soul and rebait
+    }
+
+    public findGraveyardMana(currentTeam: number): number{
+        let graveyardMana = 0;
+        for (let i = 0; i<this.boardSize; i++){
+            for (let j = 0; j<this.boardSize; j++){
+                const tile = this.board[i][j];
+                const minion = tile.currentMinion;
+                if(minion !== null){
+                    if(minion.team === currentTeam){
+                        if(tile.isGraveyard)
+                            graveyardMana++;
+
+                        if (MinionKeyword.GENERATE_MANA_2 in minion.keywords)
+                            graveyardMana += 2;
+
+                        if (MinionKeyword.GENERATE_MANA_3 in minion.keywords)
+                            graveyardMana += 3;
+                    }
+                }
+            }
+        }
+
+        return graveyardMana;
+    }
+
+    public findCasualtyMana(currentTeam: number): number{
+        let casualtyMana = 0;
+
+        for(const minion of this.captains[1 - currentTeam].casualties){
+            casualtyMana += minion.type.rebait;
+        }
+
+        return casualtyMana;
+    }
+
+    public endBoard(){
+        // TODO Implement
     }
 
     public isOnBoard(coordinate: Coordinate): boolean{

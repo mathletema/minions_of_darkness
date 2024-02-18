@@ -12,8 +12,10 @@ export class GameManager {
     public readonly board: Array<Board>;
     public boardSize: number;
     public minionTypesData: Record<UnitName, MinionTechCard>;
+    public mana: Array<number>;
+    public playNumber: number = 0;
 
-    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>) {
+    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>, mana: number) {
         this.numBoards = numBoards;
         this.boardSize = boardSize;
         
@@ -30,6 +32,8 @@ export class GameManager {
         this.currentTeam = 0;
 
         this.minionTypesData = minionData;
+
+        this.mana = [0, mana];
     }
 
     public initBoards(boardMap: Array<Array<Array<string>>>) {
@@ -46,9 +50,19 @@ export class GameManager {
     }
 
     public endTurn() {
+        let graveyardMana = 0, casualtyMana = 0;
         for(let i = 0; i < this.numBoards; i++){
-            this.board[i].endTurn();
+            graveyardMana += this.board[i].findGraveyardMana(this.currentTeam);
+            casualtyMana += this.board[i].findCasualtyMana(this.currentTeam);
+            this.board[i].endTurn(this.currentTeam);
         }
+
+        this.mana[this.currentTeam] += graveyardMana;
+        this.mana[1- this.currentTeam] += casualtyMana;
+
+        if(this.currentTeam === 1)
+            this.playNumber++;
+        
         this.currentTeam = 1 - this.currentTeam;
     }
 
