@@ -1,34 +1,42 @@
 import { Coordinate } from "../util";
 import { Captain } from "./captain";
-import { Minion, MinionKeyword, MinionType, UnitName } from "./minion";
+import { Minion, MinionKeyword, MinionTechCard, UnitName } from "./minion";
 import { Tile, TileKeyword } from "./tile"
 
 export class Board {
     public boardSize: number;
     public readonly board: Array<Array<Tile>>;
     public readonly captains: Array<Captain>;
-    public minionTypes: Record<UnitName, MinionType>;
+    public minionData: Record<UnitName, MinionTechCard>;
 
-    constructor(boardSize: number, minionTypes: Record<UnitName, MinionType>) {
+    constructor(boardSize: number, minionData: Record<UnitName, MinionTechCard>) {
         this.boardSize = boardSize;
         this.board = [];
         for (let i = 0; i < boardSize; i++) {
-            this.board.push([])
+            this.board.push([]);
             for (let j = 0; j < boardSize; j++) {
-                this.board[i].push(new Tile(false))
+                this.board[i].push(new Tile());
             }
         }
         this.captains = [
             new Captain(), 
             new Captain(),
         ];
-        this.minionTypes = minionTypes;
+        this.minionData = minionData;
     }
 
     public init(boardMap: Array<Array<string>>): void {
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
-                this.board[i][j].isWater = (boardMap[i][j] == "W");
+                switch(boardMap[i][j]){
+                    case "W": this.board[i][j].isWater = true;
+                    case "G": this.board[i][j].isGraveyard = true;
+                    case "E": this.board[i][j].tileType = TileKeyword.EARTHQUAKE;
+                    case "F": this.board[i][j].tileType = TileKeyword.FIRESTORM;
+                    case "W": this.board[i][j].tileType = TileKeyword.WHIRLWIND;
+                    case "O": this.board[i][j].tileType = TileKeyword.FLOOD;
+                    case "L": this.board[i][j].isInherentlySpecial = false;
+                }
             }
         }
     }
@@ -37,11 +45,11 @@ export class Board {
         // Give each player the starting configuration of minions
         let minion: Minion;
         for (let team = 0; team < 2; team++){
-            minion = new Minion(this.minionTypes.NECROMANCER, team);
+            minion = new Minion(this.minionData.NECROMANCER, team);
             this.createMinion(startPositions[team], minion);
 
             for (let neighbour of this.adjacentPositionsForMinion(startPositions[team], null)){
-                minion = new Minion(this.minionTypes.ZOMBIE, team);
+                minion = new Minion(this.minionData.ZOMBIE, team);
                 this.createMinion(neighbour, minion);
             }
             
@@ -95,18 +103,17 @@ export class Board {
             return MinionKeyword.FLYING in minion.keywords;
         
         let legality: boolean = true;
-        if(tile.currentMinion != null){
-            if(tile.currentMinion.team != minion.team){
+        if(tile.currentMinion !== null){
+            if(tile.currentMinion.team !== minion.team){
                 legality = (MinionKeyword.FLYING in minion.keywords);
             }
         }
 
         switch(tile.tileType){
-            case TileKeyword.DEFAULT: legality = true;
-            case TileKeyword.FLOOD: legality = (MinionKeyword.FLYING in minion.keywords);
-            case TileKeyword.EARTHQUAKE: legality = (minion.spd >= 2); 
-            case TileKeyword.FIRESTORM: legality = (minion.def >= 4);
-            case TileKeyword.WHIRLWIND: legality = (MinionKeyword.PERSISTENT in minion.keywords);
+            case TileKeyword.FLOOD: legality = legality && (MinionKeyword.FLYING in minion.keywords);
+            case TileKeyword.EARTHQUAKE: legality = legality && (minion.spd >= 2); 
+            case TileKeyword.FIRESTORM: legality = legality && (minion.def >= 4);
+            case TileKeyword.WHIRLWIND: legality = legality && (MinionKeyword.PERSISTENT in minion.keywords);
         }
 
         return legality;
@@ -140,32 +147,42 @@ export class Board {
         visited.add(start);
         queue.push({ position: start, depth: 0 });
 
+        if(start.x === target.x && start.y === target.y)
+            return true;
+
         let analyzedPositions = 0;
         while(queue.length > analyzedPositions){
             const { position, depth } = queue[analyzedPositions];
-            if (position === target)
-                return true;
             if (depth >= minion.spd)
-                continue;
+                break;
 
+            console.log("Position During BFS: " + position.x + " " + position.y);
             for (const neighbour of this.adjacentPositionsForMinion(position, minion)){
+                console.log(neighbour.x + " " + neighbour.y);
                 if(!visited.has(neighbour)){
+                    if(neighbour.x === target.x && neighbour.y === target.y)
+                        return true;
+
                     visited.add(neighbour);
                     queue.push({ position: neighbour, depth: depth + 1 })
                 }
             }
+
+            analyzedPositions++;
         }
         return false;
     }
 
     public doMove(team: number, start: Coordinate, target: Coordinate) {
-        // assert(this.board[start.x][start.y].currentMinion != null)
-        // assert(this.board[start.x][start.y].currentMinion in this.captain[team].minions)
-        // legality check, that start and end have distance less than
         let actingMinion: Minion | null = this.board[start.x][start.y].currentMinion;
         if (actingMinion === null){
            console.log("Tile is empty! No minion to move!");
            return;
+        }
+
+        if (actingMinion.team !== team){
+            console.log("Ain't your minion");
+            return;
         }
 
         if (!actingMinion.hasMoved){
@@ -179,12 +196,16 @@ export class Board {
         }
 
         if (this.board[target.x][target.y].currentMinion !== null){
-            console.log("Minion can not move on top of other minion");
-            return;
-            // TODO Minion should be able to move over friendly minion that can move,
-            // as long as that minion is forced to move as part of next micro move
-            // Minor detail.
+            if(start.x !== target.x || start.y !== target.y){
+                console.log("Minion can not move on top of other minion");
+                return;
+                // TODO Minion should be able to move over friendly minion that can move,
+                // as long as that minion is forced to move as part of next micro move
+                // Minor detail.
+            }
         }
+
+        console.log("Minion hath reach");
 
         // Minion was able to reach there!
 

@@ -20,7 +20,7 @@ export class Minion {
 
     public id: number;
 
-    public constructor(minionType : MinionType, team: number) {
+    public constructor(minionType : MinionTechCard, team: number) {
         this.spd = minionType.spd;
         this.range = minionType.range;
         this.atk = minionType.atk;
@@ -40,7 +40,7 @@ export class Minion {
     }
 }
 
-export class MinionType {
+export class MinionTechCard {
     public spd: number;
     public range: number;
     public atk: number;

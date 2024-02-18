@@ -1,6 +1,6 @@
 import { Board } from './board';
 import { Coordinate } from '../util';
-import { MinionType, Minion, UnitName, MinionKeyword } from './minion';
+import { MinionTechCard, Minion, UnitName, MinionKeyword } from './minion';
 import { General } from './general';
 
 enum MoveType { MOVE, ATTACK, SPAWN };
@@ -11,9 +11,9 @@ export class GameManager {
     public currentTeam: number;
     public readonly board: Array<Board>;
     public boardSize: number;
-    public minionTypesData: Record<UnitName, MinionType>;
+    public minionTypesData: Record<UnitName, MinionTechCard>;
 
-    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionType>) {
+    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>) {
         this.numBoards = numBoards;
         this.boardSize = boardSize;
         

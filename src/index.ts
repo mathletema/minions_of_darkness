@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { GameManager } from "./game-manager/game-manager";
 import { Coordinate } from "./util";
-import { UnitName, MinionType, MinionKeyword } from './game-manager/minion';
+import { UnitName, MinionTechCard, MinionKeyword } from './game-manager/minion';
 
 const __HELP__ =
     "help               : display this prompt    \n" +
@@ -20,10 +20,10 @@ interface gameConfig {
 }
 
 // TODO: hardcoded MinionData, will Fix
-let minionData: Record <UnitName, MinionType> = 
+let minionData: Record <UnitName, MinionTechCard> = 
 {   
-    NECROMANCER: new MinionType(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.IS_NECROMANCER, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3], 0),
-    ZOMBIE: new MinionType(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0)
+    NECROMANCER: new MinionTechCard(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.IS_NECROMANCER, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3], 0),
+    ZOMBIE: new MinionTechCard(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0)
 }
 
 let data = fs.readFileSync('./game-configs/test.json', 'utf8');
