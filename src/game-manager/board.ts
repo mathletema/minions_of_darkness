@@ -69,17 +69,9 @@ export class Board {
     public endTurn(currentTeam: number) {
         for (let team = 0; team < 2; team++){
             for (let minion of this.captains[team].activeMinions){
-                minion.atk = minion.type.atk;
-                minion.def = minion.type.def;
-                minion.spd = minion.type.spd;
-                minion.range = minion.type.range;
-
-                minion.hasMoved = false;
-                minion.hasAttacked = false;
-                minion.isExhausted = false;
+                minion.reset();
             }
         }
-        // TODO - reset minions, return soul and rebait
     }
 
     public findGraveyardMana(currentTeam: number): number{

@@ -38,6 +38,17 @@ export class Minion {
 
         this.type = minionType;
     }
+
+    public reset(){
+        this.atk = this.type.atk;
+        this.def = this.type.def;
+        this.spd = this.type.spd;
+        this.range = this.type.range;
+
+        this.hasMoved = false;
+        this.hasAttacked = false;
+        this.isExhausted = false;
+    }
 }
 
 export class MinionTechCard {
