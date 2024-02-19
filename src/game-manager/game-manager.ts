@@ -11,9 +11,10 @@ export class GameManager {
     public currentTeam: number;
     public readonly board: Array<Board>;
     public boardSize: number;
-    public minionTypesData: Record<UnitName, MinionTechCard>;
+    public minionData: Record<UnitName, MinionTechCard>;
     public mana: Array<number>;
-    public playNumber: number = 0;
+    public playNumber: number = 1;
+    public boardPoints: Array<number> = [0, 0];
 
     public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>, mana: number) {
         this.numBoards = numBoards;
@@ -31,14 +32,14 @@ export class GameManager {
 
         this.currentTeam = 0;
 
-        this.minionTypesData = minionData;
+        this.minionData = minionData;
 
         this.mana = [0, mana];
     }
 
-    public initBoards(boardMap: Array<Array<Array<string>>>) {
+    public initBoardMaps(boardMap: Array<Array<Array<string>>>) {
         for (let i = 0; i < this.numBoards; i++) {
-            this.board[i].init(boardMap[i]);
+            this.board[i].initMap(boardMap[i]);
             // this.board[i].initMinionTypesData(this.minionTypesData);
         }
     }
@@ -52,9 +53,12 @@ export class GameManager {
     public endTurn() {
         let graveyardMana = 0, casualtyMana = 0;
         for(let i = 0; i < this.numBoards; i++){
+            let winner = this.board[i].findWinner(this.currentTeam);
             graveyardMana += this.board[i].findGraveyardMana(this.currentTeam);
             casualtyMana += this.board[i].findCasualtyMana(this.currentTeam);
-            this.board[i].endTurn(this.currentTeam);
+
+            // Check how board loss works
+            this.board[i].resetMinions(this.currentTeam);
         }
 
         this.mana[this.currentTeam] += graveyardMana;
@@ -64,6 +68,17 @@ export class GameManager {
             this.playNumber++;
         
         this.currentTeam = 1 - this.currentTeam;
+
+        if (this.playNumber === 2 || this.playNumber === 3){
+            this.giftAcolytes(); // Gift acolytes on blue's first turn or yellow's second turn
+        }
+    }
+
+    public giftAcolytes() {
+        for(let i = 0; i < this.numBoards; i++){
+            const minion = new Minion(this.minionData.ACOLYTE, this.currentTeam);
+            this.board[i].createMinion(null, minion);
+        }
     }
 
     public doMove(boardIndex: number, start: Coordinate, target: Coordinate): void {

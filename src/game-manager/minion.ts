@@ -2,7 +2,7 @@ export enum MinionKeyword {
     LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD, IS_NECROMANCER, UNDEATHTOUCHABLE, GENERATE_MANA_3, GENERATE_MANA_2
 }
 
-export type UnitName = "NECROMANCER" | "ZOMBIE" // ACOLYTE, INITIATE, SKELETON, SERPENT, WARG, GHOST, WIGHT, HAUNT
+export type UnitName = "NECROMANCER" | "ZOMBIE" | "ACOLYTE"; // INITIATE, SKELETON, SERPENT, WARG, GHOST, WIGHT, HAUNT
 
 export class Minion {
     public spd: number;
@@ -63,6 +63,8 @@ export class MinionTechCard {
 
     public rawLineNumber: number;
 
+    public isNecromancer: boolean = false;
+
     public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeyword>, rawLineNumber: number) {
         this.spd = spd;
         this.range = range;
@@ -72,6 +74,9 @@ export class MinionTechCard {
         this.cost = cost;
         this.rebait = rebait;
         this.rawLineNumber = rawLineNumber;
+
+        if(MinionKeyword.GENERATE_MANA_2 in keywords || MinionKeyword.GENERATE_MANA_3 in keywords)
+            this.isNecromancer = true;
     }
 }
 

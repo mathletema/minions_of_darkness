@@ -8,6 +8,7 @@ export class Board {
     public readonly board: Array<Array<Tile>>;
     public readonly captains: Array<Captain>;
     public minionData: Record<UnitName, MinionTechCard>;
+    public hasResigned: Array<boolean> = [false, false];
 
     constructor(boardSize: number, minionData: Record<UnitName, MinionTechCard>) {
         this.boardSize = boardSize;
@@ -25,7 +26,7 @@ export class Board {
         this.minionData = minionData;
     }
 
-    public init(boardMap: Array<Array<string>>): void {
+    public initMap(boardMap: Array<Array<string>>): void {
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
                 switch(boardMap[i][j]){
@@ -66,7 +67,7 @@ export class Board {
         }
     }
 
-    public endTurn(currentTeam: number) {
+    public resetMinions(currentTeam: number) {
         for (let team = 0; team < 2; team++){
             for (let minion of this.captains[team].activeMinions){
                 minion.reset();
@@ -106,6 +107,37 @@ export class Board {
         }
 
         return casualtyMana;
+    }
+
+    public findWinner(currentTeam: number): number | null{
+        // Check if board blows up
+        if (this.hasResigned[currentTeam])
+            return 1-currentTeam;
+
+        // Check win on necromancers
+        for(const minion of this.captains[1-currentTeam].casualties){
+            if(minion.type.isNecromancer)
+                return currentTeam;
+        }
+
+        // Check win on graveyards
+        let opposingGraveyardCount = 0;
+        for (let i = 0; i<this.boardSize; i++){
+            for (let j = 0; j<this.boardSize; j++){
+                const tile = this.board[i][j];
+                const minion = tile.currentMinion;
+                if(minion !== null){
+                    if(minion.team === 1-currentTeam){
+                        opposingGraveyardCount++
+                    }
+                }
+            }
+        }
+
+        if(opposingGraveyardCount >= 8)
+            return 1 - currentTeam;
+
+        return null;
     }
 
     public endBoard(){

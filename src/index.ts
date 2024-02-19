@@ -23,7 +23,8 @@ interface gameConfig {
 let minionData: Record <UnitName, MinionTechCard> = 
 {   
     NECROMANCER: new MinionTechCard(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.IS_NECROMANCER, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3], 0),
-    ZOMBIE: new MinionTechCard(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0)
+    ZOMBIE: new MinionTechCard(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0),
+    ACOLYTE: new MinionTechCard(2, 0, 0, 2, 4, 2, [], 0)
 }
 
 let data = fs.readFileSync('./game-configs/test.json', 'utf8');
@@ -36,7 +37,7 @@ const mana = Math.floor(5.5 * NUM_BOARDS);
 
 const game = new GameManager(NUM_BOARDS, config["boardSize"], minionData, mana);
 // game.initMinionData(minionData)
-game.initBoards(config.boardMap);
+game.initBoardMaps(config.boardMap);
 game.initStartPositions(config.startNodes);
 
 game.print()
