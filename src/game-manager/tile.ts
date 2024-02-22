@@ -26,7 +26,7 @@ export class Tile {
             case TileKeyword.FLOOD: tileRep = " O ";
             case TileKeyword.EARTHQUAKE: tileRep = " E "; 
             case TileKeyword.FIRESTORM: tileRep = " F ";
-            case TileKeyword.WHIRLWIND: tileRep = " W ";
+            case TileKeyword.WHIRLWIND: tileRep = " H ";
         }
         if (this.isGraveyard) tileRep = " G ";
         if (this.isWater) tileRep = " W "

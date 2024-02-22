@@ -6,6 +6,7 @@ var minion_1 = require("./minion");
 var tile_1 = require("./tile");
 var Board = /** @class */ (function () {
     function Board(boardSize, minionData) {
+        this.hasResigned = [false, false];
         this.boardSize = boardSize;
         this.board = [];
         for (var i = 0; i < boardSize; i++) {
@@ -20,7 +21,7 @@ var Board = /** @class */ (function () {
         ];
         this.minionData = minionData;
     }
-    Board.prototype.init = function (boardMap) {
+    Board.prototype.initMap = function (boardMap) {
         for (var i = 0; i < this.boardSize; i++) {
             for (var j = 0; j < this.boardSize; j++) {
                 switch (boardMap[i][j]) {
@@ -58,20 +59,71 @@ var Board = /** @class */ (function () {
             this.captains[team].reinforcements.push(minion);
         }
     };
-    Board.prototype.endTurn = function () {
+    Board.prototype.resetMinions = function (currentTeam) {
         for (var team = 0; team < 2; team++) {
             for (var _i = 0, _a = this.captains[team].activeMinions; _i < _a.length; _i++) {
                 var minion = _a[_i];
-                minion.atk = minion.type.atk;
-                minion.def = minion.type.def;
-                minion.spd = minion.type.spd;
-                minion.range = minion.type.range;
-                minion.hasMoved = false;
-                minion.hasAttacked = false;
-                minion.isExhausted = false;
+                minion.reset();
             }
         }
-        // TODO - reset minions, return soul and rebait
+    };
+    Board.prototype.findGraveyardMana = function (currentTeam) {
+        var graveyardMana = 0;
+        for (var i = 0; i < this.boardSize; i++) {
+            for (var j = 0; j < this.boardSize; j++) {
+                var tile = this.board[i][j];
+                var minion = tile.currentMinion;
+                if (minion !== null) {
+                    if (minion.team === currentTeam) {
+                        if (tile.isGraveyard)
+                            graveyardMana++;
+                        if (minion_1.MinionKeyword.GENERATE_MANA_2 in minion.keywords)
+                            graveyardMana += 2;
+                        if (minion_1.MinionKeyword.GENERATE_MANA_3 in minion.keywords)
+                            graveyardMana += 3;
+                    }
+                }
+            }
+        }
+        return graveyardMana;
+    };
+    Board.prototype.findCasualtyMana = function (currentTeam) {
+        var casualtyMana = 0;
+        for (var _i = 0, _a = this.captains[1 - currentTeam].casualties; _i < _a.length; _i++) {
+            var minion = _a[_i];
+            casualtyMana += minion.type.rebait;
+        }
+        return casualtyMana;
+    };
+    Board.prototype.findWinner = function (currentTeam) {
+        // Check if board blows up
+        if (this.hasResigned[currentTeam])
+            return 1 - currentTeam;
+        // Check win on necromancers
+        for (var _i = 0, _a = this.captains[1 - currentTeam].casualties; _i < _a.length; _i++) {
+            var minion = _a[_i];
+            if (minion.type.isNecromancer)
+                return currentTeam;
+        }
+        // Check win on graveyards
+        var opposingGraveyardCount = 0;
+        for (var i = 0; i < this.boardSize; i++) {
+            for (var j = 0; j < this.boardSize; j++) {
+                var tile = this.board[i][j];
+                var minion = tile.currentMinion;
+                if (minion !== null) {
+                    if (minion.team === 1 - currentTeam) {
+                        opposingGraveyardCount++;
+                    }
+                }
+            }
+        }
+        if (opposingGraveyardCount >= 8)
+            return 1 - currentTeam;
+        return null;
+    };
+    Board.prototype.endBoard = function () {
+        // TODO Implement
     };
     Board.prototype.isOnBoard = function (coordinate) {
         if (coordinate.x >= this.boardSize || coordinate.x < 0)

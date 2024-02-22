@@ -22,9 +22,11 @@ interface gameConfig {
 // TODO: hardcoded MinionData, will Fix
 let minionData: Record <UnitName, MinionTechCard> = 
 {   
-    NECROMANCER: new MinionTechCard(1, 1, 0, 7, 0, 0, [MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.IS_NECROMANCER, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3], 0),
-    ZOMBIE: new MinionTechCard(1, 1, 1, 1, 2, 0, [MinionKeyword.LUMBERING], 0),
-    ACOLYTE: new MinionTechCard(2, 0, 0, 2, 4, 2, [], 0)
+    NECROMANCER: new MinionTechCard("NECROMANCER", 1, 1, 0, 7, 0, 0, 0, new Set([MinionKeyword.UNSUMMON_ATK, MinionKeyword.PERSISTENT, MinionKeyword.UNDEATHTOUCHABLE, MinionKeyword.GENERATE_MANA_3])),
+    ZOMBIE: new MinionTechCard("ZOMBIE", 1, 1, 1, 1, 2, 0, 0, new Set([MinionKeyword.LUMBERING])),
+    ACOLYTE: new MinionTechCard("ACOLYTE", 2, 0, 0, 2, 4, 2, 0, new Set()),
+    INITIATE: new MinionTechCard("INITIATE", 2, 1, 2, 3, 3, 1, 1, new Set([MinionKeyword.LUMBERING, MinionKeyword.SPAWNING, MinionKeyword.CRT_FLOOD, MinionKeyword.PERSISTENT])),
+    SKELETON: new MinionTechCard("SKELETON", 1, 1, 5, 2, 3, 1, 2, new Set([MinionKeyword.FLYING])),
 }
 
 let data = fs.readFileSync('./game-configs/test.json', 'utf8');
@@ -58,6 +60,9 @@ process.stdin.on("data", (buffer) => {
         } catch {
             process.stdout.write(`invalid move command`)
         }
+    }
+    else if (data[0] == "pass") {
+        game.endTurn();
     }
     else {
         process.stdout.write(`command ${data[0]} not found, see help for more\n`)

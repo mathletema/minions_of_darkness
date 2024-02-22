@@ -1,18 +1,20 @@
+import cloneDeep from 'lodash.clonedeep';
+
 export enum MinionKeyword {
-    LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD, IS_NECROMANCER, UNDEATHTOUCHABLE, GENERATE_MANA_3, GENERATE_MANA_2
+    LUMBERING, FLURRY, FLYING, SPAWNING, PERSISTENT, UNSUMMON_ATK, DEADLY_ATK, WARD, BLINK, CRT_WHIRLWIND, CRT_EARTHQUAKE, CRT_FIRESTORM, CRT_FLOOD, UNDEATHTOUCHABLE, GENERATE_MANA_3, GENERATE_MANA_2
 }
 
-export type UnitName = "NECROMANCER" | "ZOMBIE" | "ACOLYTE"; // INITIATE, SKELETON, SERPENT, WARG, GHOST, WIGHT, HAUNT
+export type UnitName = "NECROMANCER" | "ZOMBIE" | "ACOLYTE" | "INITIATE" | "SKELETON"; //, SERPENT, WARG, GHOST, WIGHT, HAUNT
 
 export class Minion {
     public spd: number;
     public range: number;
     public atk: number;
     public def: number;
-    public readonly keywords: Array<MinionKeyword>;
+    public readonly keywords: Set<MinionKeyword>;
 
-    public hasMoved: boolean;
-    public hasAttacked: boolean;
+    public canMove: boolean;
+    public canAttack: boolean;
     public isExhausted: boolean;
 
     public team;
@@ -28,11 +30,11 @@ export class Minion {
 
         this.id = Math.random()
 
-        this.keywords = minionType.keywords.slice();
+        this.keywords = cloneDeep(minionType.keywords);
 
-        this.hasMoved = true;
-        this.hasAttacked = true;
-        this.isExhausted = true;
+        this.canMove = false;
+        this.canAttack = false;
+        this.isExhausted = false;
 
         this.team = team;
 
@@ -45,9 +47,13 @@ export class Minion {
         this.spd = this.type.spd;
         this.range = this.type.range;
 
-        this.hasMoved = false;
-        this.hasAttacked = false;
+        this.canMove = true;
+        this.canAttack = true;
         this.isExhausted = false;
+    }
+
+    public print(){
+
     }
 }
 
@@ -56,16 +62,17 @@ export class MinionTechCard {
     public range: number;
     public atk: number;
     public def: number;
-    public readonly keywords: Array<MinionKeyword>;
+    public readonly keywords: Set<MinionKeyword>;
 
     public cost: number;
     public rebait: number;
 
-    public rawLineNumber: number;
+    public name: string;
 
+    public rawLineNumber: number;
     public isNecromancer: boolean = false;
 
-    public constructor(spd: number, range: number, atk: number, def: number, cost: number, rebait: number, keywords: Array<MinionKeyword>, rawLineNumber: number) {
+    public constructor(name: string, spd: number, range: number, atk: number, def: number, cost: number, rebait: number, rawLineNumber: number, keywords: Set<MinionKeyword>) {
         this.spd = spd;
         this.range = range;
         this.atk = atk;
@@ -74,8 +81,9 @@ export class MinionTechCard {
         this.cost = cost;
         this.rebait = rebait;
         this.rawLineNumber = rawLineNumber;
+        this.name = name;
 
-        if(MinionKeyword.GENERATE_MANA_2 in keywords || MinionKeyword.GENERATE_MANA_3 in keywords)
+        if(keywords.has(MinionKeyword.GENERATE_MANA_2) || keywords.has(MinionKeyword.GENERATE_MANA_3))
             this.isNecromancer = true;
     }
 }

@@ -9,6 +9,7 @@ export class Board {
     public readonly captains: Array<Captain>;
     public minionData: Record<UnitName, MinionTechCard>;
     public hasResigned: Array<boolean> = [false, false];
+    public isSpawnStage: boolean = false;
 
     constructor(boardSize: number, minionData: Record<UnitName, MinionTechCard>) {
         this.boardSize = boardSize;
@@ -34,7 +35,7 @@ export class Board {
                     case "G": this.board[i][j].isGraveyard = true;
                     case "E": this.board[i][j].tileType = TileKeyword.EARTHQUAKE;
                     case "F": this.board[i][j].tileType = TileKeyword.FIRESTORM;
-                    case "W": this.board[i][j].tileType = TileKeyword.WHIRLWIND;
+                    case "H": this.board[i][j].tileType = TileKeyword.WHIRLWIND;
                     case "O": this.board[i][j].tileType = TileKeyword.FLOOD;
                     case "L": this.board[i][j].isInherentlySpecial = false;
                 }
@@ -48,10 +49,12 @@ export class Board {
         for (let team = 0; team < 2; team++){
             minion = new Minion(this.minionData.NECROMANCER, team);
             this.createMinion(startPositions[team], minion);
+            minion.reset();
 
             for (let neighbour of this.adjacentPositionsForMinion(startPositions[team], null)){
                 minion = new Minion(this.minionData.ZOMBIE, team);
                 this.createMinion(neighbour, minion);
+                minion.reset();
             }
         }
     }
@@ -59,11 +62,11 @@ export class Board {
     public createMinion(position: Coordinate | null, minion: Minion) {
         let team = minion.team;
         if (position !== null){
-            this.captains[team].activeMinions.push(minion);
+            this.captains[team].activeMinions.add(minion);
             this.board[position.x][position.y].currentMinion = minion;
         }
         else {
-            this.captains[team].reinforcements.push(minion);
+            this.captains[team].reinforcements.add(minion);
         }
     }
 
@@ -86,10 +89,10 @@ export class Board {
                         if(tile.isGraveyard)
                             graveyardMana++;
 
-                        if (MinionKeyword.GENERATE_MANA_2 in minion.keywords)
+                        if (minion.keywords.has(MinionKeyword.GENERATE_MANA_2))
                             graveyardMana += 2;
 
-                        if (MinionKeyword.GENERATE_MANA_3 in minion.keywords)
+                        if (minion.keywords.has(MinionKeyword.GENERATE_MANA_3))
                             graveyardMana += 3;
                     }
                 }
@@ -161,20 +164,20 @@ export class Board {
 
         let tile = this.board[coordinate.x][coordinate.y];
         if(tile.isWater)
-            return MinionKeyword.FLYING in minion.keywords;
+            return minion.keywords.has(MinionKeyword.FLYING);
         
         let legality: boolean = true;
         if(tile.currentMinion !== null){
             if(tile.currentMinion.team !== minion.team){
-                legality = (MinionKeyword.FLYING in minion.keywords);
+                legality = minion.keywords.has(MinionKeyword.FLYING);
             }
         }
 
         switch(tile.tileType){
-            case TileKeyword.FLOOD: legality = legality && (MinionKeyword.FLYING in minion.keywords);
+            case TileKeyword.FLOOD: legality = legality && minion.keywords.has(MinionKeyword.FLYING);
             case TileKeyword.EARTHQUAKE: legality = legality && (minion.spd >= 2); 
             case TileKeyword.FIRESTORM: legality = legality && (minion.def >= 4);
-            case TileKeyword.WHIRLWIND: legality = legality && (MinionKeyword.PERSISTENT in minion.keywords);
+            case TileKeyword.WHIRLWIND: legality = legality && minion.keywords.has(MinionKeyword.PERSISTENT);
         }
 
         return legality;
@@ -234,7 +237,26 @@ export class Board {
         return false;
     }
 
+    public absoluteDistance(start: Coordinate, target: Coordinate): number{
+        const xDifference = (target.x - start.x), yDifference = (target.y - start.y);
+        const zDifference = xDifference - yDifference;
+
+        let differences = [Math.abs(xDifference), Math.abs(yDifference), Math.abs(zDifference)];
+        differences = differences.sort((n1, n2) => n1 - n2);
+
+        return differences[0] + differences[1];
+
+    }
+
     public doMove(team: number, start: Coordinate, target: Coordinate) {
+        if(this.isSpawnStage){
+            console.log("You have reached spawning stage!");
+            return;
+        }
+        if (!this.isOnBoard(start) || !this.isOnBoard(target)){
+            console.log("Must be on board");
+            return;
+        }
         let actingMinion: Minion | null = this.board[start.x][start.y].currentMinion;
         if (actingMinion === null){
            console.log("Tile is empty! No minion to move!");
@@ -246,8 +268,8 @@ export class Board {
             return;
         }
 
-        if (!actingMinion.hasMoved){
-            console.log("Minion has moved");
+        if (!actingMinion.canMove){
+            console.log("Minion can't move no more");
             return;
         }
         
@@ -272,13 +294,108 @@ export class Board {
 
         this.board[start.x][start.y].currentMinion = null;
         this.board[target.x][target.y].currentMinion = actingMinion;
-        actingMinion.hasMoved = true;
+        actingMinion.canMove = false;
     }
 
     public doAttack(team: number, start: Coordinate, target: Coordinate) {
+        if(this.isSpawnStage){
+            console.log("You have reached spawning stage!");
+            return;
+        }
+
+        if (!this.isOnBoard(start) || !this.isOnBoard(target)){
+            console.log("Must be on board");
+            return;
+        }
+        let actingMinion: Minion | null = this.board[start.x][start.y].currentMinion;
+        if (actingMinion === null){
+           console.log("Tile is empty! No minion to attack with!");
+           return;
+        }
+
+        if (actingMinion.team !== team){
+            console.log("Ain't your minion");
+            return;
+        }
+
+        let targetMinion: Minion | null = this.board[start.x][start.y].currentMinion;
+        if (targetMinion === null){
+            console.log("Tile is empty! No minion to attack!");
+            return;
+        }
+ 
+        if (actingMinion.team === team){
+            console.log("Self-attack :<>:");
+            return;
+        }
+
+        if (this.absoluteDistance(start, target) >= actingMinion.range){
+            console.log("Too far. Can't attack");
+            return;
+        }
+
+        if (actingMinion.canAttack = false){
+            console.log("This minion can't attack");
+            return;
+        }
+
+        targetMinion.def -= actingMinion.atk; // TODO: Add keywords later
+        if (!actingMinion.keywords.has(MinionKeyword.FLURRY))
+            actingMinion.canAttack = false;
+        actingMinion.canMove = false; 
+
+        if(targetMinion.def <= 0){
+            this.board[target.x][target.y].currentMinion = null;
+            this.captains[1 - team].casualties.add(targetMinion);
+        }   
     }
 
-    public doSpawn(team: number, position: Coordinate, minion: Minion) {
+    public doSpawn(team: number, target: Coordinate, minion: Minion) {
+        if (!this.isSpawnStage){
+            console.log("Not spawn stage yet!");
+            return;
+        }
+
+        if (!(this.captains[team].reinforcements.has(minion))){
+            console.log("That minion isn't yours!");
+            return;
+        }
+
+        if (minion.team != team){
+            console.log("Ain't fair teams buddy");
+            return;
+        }
+
+        if (!this.isOnBoard(target)){
+            console.log("Poor chap will spawn 'n fall off the map");
+            return;
+        }
+
+        if (!this.isLegalPlacement(target, minion)){
+            console.log("Minion cannot stand on that hex");
+            return;
+        }
+
+        if (this.board[target.x][target.y].currentMinion !== null){
+            console.log("Is, A minion there!");
+            return;
+        }
+
+        let isAdjacentSpawner = false;
+        for(const adjacentPosition of this.adjacentPositionsForMinion(target, null)){
+            const minion = this.board[adjacentPosition.x][adjacentPosition.y].currentMinion;
+            if (minion !== null){
+                if(minion.keywords.has(MinionKeyword.SPAWNING) && !minion.isExhausted)
+                    isAdjacentSpawner = true;
+            }
+        }
+        if (!isAdjacentSpawner){
+            console.log("Who ya spawning off");
+            return;
+        }
+
+        this.board[target.x][target.y].currentMinion = minion;
+        this.captains[team].reinforcements.delete(minion);
     }
 
     public print(): void {
@@ -329,5 +446,11 @@ export class Board {
             process.stdout.write('|\n')
         }
         process.stdout.write('|' + '_'.repeat(W) + '|' + '\n');   
+    }
+
+    public printTeamView(team: number){
+        for (const minion of this.captains[team].casualties){
+            console.log()
+        }
     }
 }

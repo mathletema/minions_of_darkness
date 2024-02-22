@@ -15,8 +15,8 @@ export class GameManager {
     public mana: Array<number>;
     public playNumber: number = 1;
     public boardPoints: Array<number> = [0, 0];
-
-    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>, mana: number) {
+    
+    public constructor (numBoards: number, boardSize: number, minionData: Record<UnitName, MinionTechCard>, startingMana: number) {
         this.numBoards = numBoards;
         this.boardSize = boardSize;
         
@@ -34,7 +34,7 @@ export class GameManager {
 
         this.minionData = minionData;
 
-        this.mana = [0, mana];
+        this.mana = [0, startingMana];
     }
 
     public initBoardMaps(boardMap: Array<Array<Array<string>>>) {
@@ -53,7 +53,7 @@ export class GameManager {
     public endTurn() {
         let graveyardMana = 0, casualtyMana = 0;
         for(let i = 0; i < this.numBoards; i++){
-            let winner = this.board[i].findWinner(this.currentTeam);
+            const winner = this.board[i].findWinner(this.currentTeam);
             graveyardMana += this.board[i].findGraveyardMana(this.currentTeam);
             casualtyMana += this.board[i].findCasualtyMana(this.currentTeam);
 
@@ -62,7 +62,7 @@ export class GameManager {
         }
 
         this.mana[this.currentTeam] += graveyardMana;
-        this.mana[1- this.currentTeam] += casualtyMana;
+        this.mana[1 - this.currentTeam] += casualtyMana;
 
         if(this.currentTeam === 1)
             this.playNumber++;
@@ -100,5 +100,6 @@ export class GameManager {
             console.log("\n\n");
         }
         console.log("Current team" + this.currentTeam + "\n\n");
+        console.log("Meowna " + this.mana[0] + " " + this.mana[1]);
     }
 }

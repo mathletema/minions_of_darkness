@@ -35,11 +35,21 @@ var Minion = /** @class */ (function () {
         this.team = team;
         this.type = minionType;
     }
+    Minion.prototype.reset = function () {
+        this.atk = this.type.atk;
+        this.def = this.type.def;
+        this.spd = this.type.spd;
+        this.range = this.type.range;
+        this.hasMoved = false;
+        this.hasAttacked = false;
+        this.isExhausted = false;
+    };
     return Minion;
 }());
 exports.Minion = Minion;
 var MinionTechCard = /** @class */ (function () {
     function MinionTechCard(spd, range, atk, def, cost, rebait, keywords, rawLineNumber) {
+        this.isNecromancer = false;
         this.spd = spd;
         this.range = range;
         this.atk = atk;
@@ -48,6 +58,8 @@ var MinionTechCard = /** @class */ (function () {
         this.cost = cost;
         this.rebait = rebait;
         this.rawLineNumber = rawLineNumber;
+        if (MinionKeyword.GENERATE_MANA_2 in keywords || MinionKeyword.GENERATE_MANA_3 in keywords)
+            this.isNecromancer = true;
     }
     return MinionTechCard;
 }());

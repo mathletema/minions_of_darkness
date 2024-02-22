@@ -12,15 +12,17 @@ var __PROMPT__ = "_> ";
 // TODO: hardcoded MinionData, will Fix
 var minionData = {
     NECROMANCER: new minion_1.MinionTechCard(1, 1, 0, 7, 0, 0, [minion_1.MinionKeyword.UNSUMMON_ATK, minion_1.MinionKeyword.PERSISTENT, minion_1.MinionKeyword.IS_NECROMANCER, minion_1.MinionKeyword.UNDEATHTOUCHABLE, minion_1.MinionKeyword.GENERATE_MANA_3], 0),
-    ZOMBIE: new minion_1.MinionTechCard(1, 1, 1, 1, 2, 0, [minion_1.MinionKeyword.LUMBERING], 0)
+    ZOMBIE: new minion_1.MinionTechCard(1, 1, 1, 1, 2, 0, [minion_1.MinionKeyword.LUMBERING], 0),
+    ACOLYTE: new minion_1.MinionTechCard(2, 0, 0, 2, 4, 2, [], 0)
 };
 var data = fs.readFileSync('./game-configs/test.json', 'utf8');
 var config = JSON.parse(data);
 console.log(config.startNodes[0][0]);
 var NUM_BOARDS = 2;
-var game = new game_manager_1.GameManager(NUM_BOARDS, config["boardSize"], minionData);
+var mana = Math.floor(5.5 * NUM_BOARDS);
+var game = new game_manager_1.GameManager(NUM_BOARDS, config["boardSize"], minionData, mana);
 // game.initMinionData(minionData)
-game.initBoards(config.boardMap);
+game.initBoardMaps(config.boardMap);
 game.initStartPositions(config.startNodes);
 game.print();
 process.stdout.write(__PROMPT__);
