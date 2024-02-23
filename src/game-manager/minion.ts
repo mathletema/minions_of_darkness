@@ -53,7 +53,7 @@ export class Minion {
     }
 
     public print(){
-
+        console.log(this.type.name);
     }
 }
 

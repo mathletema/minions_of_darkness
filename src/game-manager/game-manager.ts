@@ -50,6 +50,13 @@ export class GameManager {
         }
     }
 
+    public giftAcolytes() {
+        for(let i = 0; i < this.numBoards; i++){
+            const minion = new Minion(this.minionData.ACOLYTE, this.currentTeam);
+            this.board[i].createMinion(minion);
+        }
+    }
+
     public endTurn() {
         let graveyardMana = 0, casualtyMana = 0;
         for(let i = 0; i < this.numBoards; i++){
@@ -74,13 +81,6 @@ export class GameManager {
         }
     }
 
-    public giftAcolytes() {
-        for(let i = 0; i < this.numBoards; i++){
-            const minion = new Minion(this.minionData.ACOLYTE, this.currentTeam);
-            this.board[i].createMinion(null, minion);
-        }
-    }
-
     public doMove(boardIndex: number, start: Coordinate, target: Coordinate): void {
         this.board[boardIndex].doMove(this.currentTeam, start, target);
     }
@@ -91,6 +91,18 @@ export class GameManager {
 
     public doSpawn(boardIndex: number, position: Coordinate, minion: Minion): void {
         this.board[boardIndex].doSpawn(this.currentTeam, position, minion);
+    }
+
+    public buyMinion(boardIndex: number, unitName: UnitName){
+        const minionTechCard = this.minionData[unitName];
+        if(this.mana[this.currentTeam] < minionTechCard.cost){
+            console.log("Insufficient money for buying that unit");
+            return;
+        }
+
+        this.mana[this.currentTeam] -= this.minionData[unitName].cost;
+        const minion = new Minion(minionTechCard, this.currentTeam);
+        this.board[boardIndex].createMinion(minion);
     }
 
     public print() {

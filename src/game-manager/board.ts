@@ -48,18 +48,18 @@ export class Board {
         let minion: Minion;
         for (let team = 0; team < 2; team++){
             minion = new Minion(this.minionData.NECROMANCER, team);
-            this.createMinion(startPositions[team], minion);
+            this.createMinion(minion, startPositions[team]);
             minion.reset();
 
-            for (let neighbour of this.adjacentPositionsForMinion(startPositions[team], null)){
+            for (let neighbour of this.adjacentPositionsForMinion(startPositions[team])){
                 minion = new Minion(this.minionData.ZOMBIE, team);
-                this.createMinion(neighbour, minion);
+                this.createMinion(minion, neighbour);
                 minion.reset();
             }
         }
     }
 
-    public createMinion(position: Coordinate | null, minion: Minion) {
+    public createMinion(minion: Minion, position: Coordinate | null = null) {
         let team = minion.team;
         if (position !== null){
             this.captains[team].activeMinions.add(minion);
@@ -155,7 +155,7 @@ export class Board {
         return true;
     }
 
-    public isLegalPlacement(coordinate: Coordinate, minion: Minion | null): boolean{
+    public isLegalPlacement(coordinate: Coordinate, minion: Minion | null = null): boolean{
         if(!this.isOnBoard(coordinate))
             return false;
 
@@ -183,7 +183,7 @@ export class Board {
         return legality;
     }
 
-    public adjacentPositionsForMinion(position: Coordinate, minion: Minion | null): Array<Coordinate>{
+    public adjacentPositionsForMinion(position: Coordinate, minion: Minion | null = null): Array<Coordinate>{
         let adjacentPositions: Array<Coordinate> = new Array();
         let potentialPositions: Array<Coordinate> = 
         [
@@ -382,7 +382,7 @@ export class Board {
         }
 
         let isAdjacentSpawner = false;
-        for(const adjacentPosition of this.adjacentPositionsForMinion(target, null)){
+        for(const adjacentPosition of this.adjacentPositionsForMinion(target)){
             const minion = this.board[adjacentPosition.x][adjacentPosition.y].currentMinion;
             if (minion !== null){
                 if(minion.keywords.has(MinionKeyword.SPAWNING) && !minion.isExhausted)
@@ -445,12 +445,22 @@ export class Board {
             }
             process.stdout.write('|\n')
         }
-        process.stdout.write('|' + '_'.repeat(W) + '|' + '\n');   
+        process.stdout.write('|' + '_'.repeat(W) + '|' + '\n');
+        
+        for(let team = 0; team < 2; team++){
+            this.printTeamDetails(team);
+        }
     }
 
-    public printTeamView(team: number){
+    public printTeamDetails(team: number){
+        console.log("REINFORCEMENTS: " + team);
+        for (const minion of this.captains[team].reinforcements){
+            minion.print();
+        }
+
+        console.log("\nCASUALTIES: " + team);
         for (const minion of this.captains[team].casualties){
-            console.log()
+            minion.print();
         }
     }
 }
